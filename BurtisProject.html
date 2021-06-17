@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>JT_Multi-Shader</title>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="600" height="600" style="float:left;">
+    Please use a browser that supports "canvas"
+    </canvas>
+    <br>
+    <div id = "info" style = "margin-left:635px;" >
+   	<b>Particle System Controls:</b> <br>
+  <b>c or C key:</b> toggle clear-screen. <b>r/R key:</b> soft/hard reset. <br><b>Space-bar:</b> single-step.    <b>p or P key:</b> pause/resume.	 <br>
+	<b>t/T key:</b> less/more drag.  <b>g/G key:</b> less/more gravity 
+	<br><b>v or V: switch solvers</b> (implicit vs. explicit)
+	<br><b>b or B:</b> floor-bounce method
+	<!-- Make 'div' elements to hold changeable HTML made in our JavaScript file;
+		 (where? look at the end of 'BouncyBall03.js' at 
+			myKeyPress(), myKeyDown() and myKeyUp() fcns)
+	-->
+	<p>
+      <button type="button" onclick="VBO3toggle()">Euler Solver</button>
+      <button type="button" onclick="VBO4toggle()">Midpoint Solver</button>
+      <button type="button" onclick="VBO5toggle()">Velocity-Verlet Solver</button>
+     <button type="button" onclick="VBO6toggle()">Adams-Bashforth Solver</button>
+     
+     <button type="button" onclick="VBO7toggle()">Reverse Midpoint Solver</button>
+</p>
+	<p>
+	<button type="button" onclick="Part0toggle()">Bouncy Balls hide/show</button>
+      <button type="button" onclick="Part1toggle()">Wind hide/show</button>
+      <button type="button" onclick="Part2toggle()">Fire hide/show</button>
+      <button type="button" onclick="Part3toggle()">Boid hide/show</button>
+      <button type="button" onclick="Part4toggle()">Spring hide/show</button>
+  </p>
+  
+	<p>
+	      <button type="button" onclick="VBO0toggle()">World hide/show</button> <br>
+
+   <!--   <button type="button" onclick="onPlusButton()" >++Start</button>
+      <button type="button" onclick="onMinusButton()">--Start</button> -->
+		<b>For Bouncy Balls</b>: Press 'r' to launch <br> <br>
+		<b>For Wind</b>: Press 'z' to throw all particles up <br> <br>
+		<b>For Spring</b>: Hold 'y' to pull down <br> <br>
+	</p>
+	</div>
+    <script src="lib/webgl-utils.js"></script>
+    <script src="lib/webgl-debug.js"></script>
+    <script src="lib/cuon-utils.js"></script>
+    <script src="lib/cuon-matrix-quat03.js"></script>
+<!-- YOU SHOULD UPGRADE to Brandon Jones' far-faster, 
+      far more complete vector/matrix/quaternion library: (Google it!)
+		<script src="../lib/glmatrix.js"></script>
+--> 
+	<script src="ParticleSystems/AbstractParticleSystems.js"></script>
+	<script src="ParticleSystems/FireSystem.js"></script>
+	<script src="ParticleSystems/ForceField.js"></script>
+	<script src="ParticleSystems/BoidSystem.js"></script>
+	<script src="ParticleSystems/SpringSystem.js"></script>
+	<script src="ParticleSystems/WindySystem.js"></script>
+	<script src="Util/DensityCalculator.js"></script>
+	<script src="Util/PressureCalculator.js"></script>
+	<script src="Util/ViscosityCalculator.js"></script>
+  <script src="CurrentSolvers.js"></script>
+  <script src="OldSolvers.js"></script>
+  <script src="sphSolver.js"></script>
+  <script src="Main.js"></script>
+  </body>
+</html>
