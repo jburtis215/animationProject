@@ -137,7 +137,7 @@ makeGroundGrid();
 worldBox = new VBObox0();		  // Holds VBO & shaders for drawing world surfaces;
 part1Box = new VBObox1();		  // "  "  for drawing 1st particle system
 part2Box = new VBObox2();     // "  "  for drawing 2nd particle system
-part3Box = new VBObox10();
+fluidParticleBox = new FluidVBObox();
 part4Box = new VBObox9();
 part5Box = new VBObox5();
 part6Box = new VBObox6();
@@ -188,7 +188,7 @@ var g_bounce = 1;				// floor-bounce constraint type:
 
 var yvelNow = 0.0;
 var zvelNow = 0.0;
-var partCount = 100;
+var partCount = 1000;
 //var s0 = new Float32Array(partCount*PART_MAXVAR);
 
 //PartSys_init();
@@ -262,12 +262,10 @@ function main() {
         console.log('Failed to get the rendering context for WebGL');
         return;
     }
-    partSys1.BouncyS0();
+
     partSys1.ForceField();
-    partSys2.WindyS0();
-    partSys3.FireS0();
-    partSys4.BoidS0();
-    partSys5.SpringS0();
+
+
     // Register the Mouse & Keyboard Event-handlers-------------------------------
     // If users move, click or drag the mouse, or they press any keys on the
     // the operating system will sense them immediately as 'events'.
@@ -302,13 +300,13 @@ function main() {
     // Initialize each of our 'vboBox' objects:
     worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,
                               // including ground-plane,
-    part1Box.init(gl);		//  "		"		"  for 1st particle system in the 3D world
-    part2Box.init(gl);    //  "   "   "  for 2nd particle system in the 3D world
-    part3Box.init(gl);
-    part4Box.init(gl);
-    part5Box.init(gl);
-    part6Box.init(gl);
-    part7Box.init(gl);
+  // part1Box.init(gl);		//  "		"		"  for 1st particle system in the 3D world
+    //part2Box.init(gl);    //  "   "   "  for 2nd particle system in the 3D world
+    fluidParticleBox.init(gl);
+    //part4Box.init(gl);
+  //  part5Box.init(gl);
+   // part6Box.init(gl);
+   // part7Box.init(gl);
     gl.clearColor(0, 0, 0, 1);	  // RGBA color for clearing <canvas>
 
     // ==============ANIMATION=============
@@ -337,7 +335,7 @@ function main() {
         zCamPos = animateZPos(zCamPos);
         g_currentAngle = makeSpin(g_currentAngle);  // Update the rotation angle
         zlook = animatez(zlook);
-        if (g_show3 == 1) part3Box.resetSpring(partSys5);
+        if (g_show3 == 1) fluidParticleBox.resetSpring(partSys5);
         if (g_show4 == 1) part4Box.resetSpring(partSys5);
         if (g_show5 == 1) part5Box.resetSpring(partSys5);
         if (g_show6 == 1) part6Box.resetSpring(partSys5);
@@ -399,19 +397,19 @@ function draw() {
       part3Box.PartSys_render(gl);
       */
         if (part1 == 1) {
-            part3Box.adjust1(gl, partSys1);
+            fluidParticleBox.adjust1(gl, partSys1);
         }
         if (part2 == 1) {
-            part3Box.adjust1(gl, partSys2);
+            fluidParticleBox.adjust1(gl, partSys2);
         }
         if (part3 == 1) {
-            part3Box.adjust1(gl, partSys3);
+            fluidParticleBox.adjust1(gl, partSys3);
         }
         if (part4 == 1) {
-            part3Box.adjust1(gl, partSys4);
+            fluidParticleBox.adjust1(gl, partSys4);
         }
         if (part5 == 1) {
-            part3Box.adjust1(gl, partSys5);
+            fluidParticleBox.adjust1(gl, partSys5);
         }
 
     }

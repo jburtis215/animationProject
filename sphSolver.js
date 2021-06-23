@@ -1169,7 +1169,7 @@ VBObox9.prototype.resetSpring = function (partSys) {
 
 
 
-function VBObox10() {
+function FluidVBObox() {
 //=============================================================================
 //=============================================================================
 // CONSTRUCTOR for one re-usable 'VBObox' object  that holds all data and fcns
@@ -1236,7 +1236,7 @@ function VBObox10() {
 };
 
 
-VBObox10.prototype.init = function (myGL) {
+FluidVBObox.prototype.init = function (myGL) {
 //=============================================================================
 // Create, compile, link this VBObox object's shaders to an executable 'program'
 // ready for use in the GPU.  Create and fill a Float32Array that holds all VBO
@@ -1288,7 +1288,7 @@ VBObox10.prototype.init = function (myGL) {
     //		--STREAM_DRAW is for vertex buffers that are rendered a small number of
     // 			times and then discarded; for rapidly supplied & consumed VBOs.
     myGL.bufferData(gl.ARRAY_BUFFER, 			// GLenum target(same as 'bindBuffer()')
-        partSys3.s0, 		// JavaScript Float32Array
+        partSys1.s0, 		// JavaScript Float32Array
         gl.DYNAMIC_DRAW);			// Usage hint.
 
 // Find & Set All Attributes:------------------------------
@@ -1367,21 +1367,18 @@ VBObox10.prototype.init = function (myGL) {
     }
 }
 
-VBObox10.prototype.adjust1 = function (mygl, partSys) {
+FluidVBObox.prototype.adjust1 = function (mygl, partSys) {
     mygl.useProgram(this.shaderLoc);	// In the GPU, SELECT our already-compiled
     partSys.minDensity = 1000000;
     partSys.maxDensity = 1;
-   // if (oneTime < 1){
-        this.applyForces(mygl, partSys);
-        this.s0dotFinder(mygl, partSys);
-        this.findFirstS1(mygl, partSys);
-        this.applyS1Forces(mygl, partSys);
-        this.s1DotFinder(mygl, partSys);
-        this.findBackS2(mygl, partSys);
-        this.render(mygl, partSys);
-        this.PartSys_constrain1(partSys);
- //            oneTime++;
-   // }
+    this.applyForces(mygl, partSys);
+    this.s0dotFinder(mygl, partSys);
+    this.findFirstS1(mygl, partSys);
+    this.applyS1Forces(mygl, partSys);
+    this.s1DotFinder(mygl, partSys);
+    this.findBackS2(mygl, partSys);
+    this.render(mygl, partSys);
+    this.PartSys_constrain1(partSys);
     partSys.buffer = partSys.s0.slice();
     partSys.s0 = partSys.s1.slice();
     partSys.s1 = partSys.buffer.slice();
@@ -1389,7 +1386,7 @@ VBObox10.prototype.adjust1 = function (mygl, partSys) {
     this.PartSys_render(gl, partSys);
 
 }
-VBObox10.prototype.applyForces = function (mygl, partSys) {
+FluidVBObox.prototype.applyForces = function (mygl, partSys) {
 
         partSys.cforcer[F_MOUSE](partSys.partCount, partSys.s0);
         partSys.cforcer[F_GRAV_E](partSys.partCount, partSys.s0);
@@ -1408,7 +1405,7 @@ VBObox10.prototype.applyForces = function (mygl, partSys) {
 }
 
 
-VBObox10.prototype.s0dotFinder = function (mygl, partSys) {
+FluidVBObox.prototype.s0dotFinder = function (mygl, partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
@@ -1448,7 +1445,7 @@ VBObox10.prototype.s0dotFinder = function (mygl, partSys) {
 
 }
 
-VBObox10.prototype.findFirstS1 = function (mygl, partSys) {
+FluidVBObox.prototype.findFirstS1 = function (mygl, partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
@@ -1473,7 +1470,7 @@ VBObox10.prototype.findFirstS1 = function (mygl, partSys) {
     }
 }
 
-VBObox10.prototype.applyS1Forces = function (mygl, partSys) {
+FluidVBObox.prototype.applyS1Forces = function (mygl, partSys) {
 
         partSys.cforcer[F_MOUSE](partSys.partCount, partSys.s1);
         partSys.cforcer[F_GRAV_E](partSys.partCount, partSys.s1);
@@ -1490,7 +1487,7 @@ VBObox10.prototype.applyS1Forces = function (mygl, partSys) {
     partSys.maxDensity = results[1];
 }
 
-VBObox10.prototype.s1DotFinder = function (mygl, partSys) {
+FluidVBObox.prototype.s1DotFinder = function (mygl, partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
@@ -1526,7 +1523,7 @@ VBObox10.prototype.s1DotFinder = function (mygl, partSys) {
 
 }
 
-VBObox10.prototype.findBackS2 = function (mygl, partSys) {
+FluidVBObox.prototype.findBackS2 = function (mygl, partSys) {
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
         partSys.s2[pOff + PART_XPOS] = -(partSys.s1dot[pOff + PART_XPOS] * timeStep) + partSys.s1[pOff + PART_XPOS];
@@ -1549,7 +1546,7 @@ VBObox10.prototype.findBackS2 = function (mygl, partSys) {
     }
 }
 
-VBObox10.prototype.render = function (mygl, partSys) {
+FluidVBObox.prototype.render = function (mygl, partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
@@ -1579,7 +1576,7 @@ VBObox10.prototype.render = function (mygl, partSys) {
     }
 }
 
-VBObox10.prototype.PartSys_constrain1 = function (partSys) {
+FluidVBObox.prototype.PartSys_constrain1 = function (partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;
@@ -1590,7 +1587,7 @@ VBObox10.prototype.PartSys_constrain1 = function (partSys) {
     }
 }
 
-VBObox10.prototype.PartSys_render = function (myGL, partSys) {
+FluidVBObox.prototype.PartSys_render = function (myGL, partSys) {
 
 //=============================================================================
 // Send commands to GPU to select and render current VBObox contents.
@@ -1658,7 +1655,7 @@ VBObox10.prototype.PartSys_render = function (myGL, partSys) {
 }
 
 
-VBObox10.prototype.reset = function (partSys) {
+FluidVBObox.prototype.reset = function (partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;			// starting index of each particle
@@ -1673,7 +1670,7 @@ VBObox10.prototype.reset = function (partSys) {
         } else partSys.s0[pOff + PART_ZVEL] += (0.02 + 0.08 * Math.random()) * INIT_VEL;
     }
 }
-VBObox10.prototype.resetWind = function (partSys) {
+FluidVBObox.prototype.resetWind = function (partSys) {
     for (var i = 0; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;			// starting index of each particle
         if (partSys.s0[pOff + PART_XVEL] > 0) {
@@ -1687,7 +1684,7 @@ VBObox10.prototype.resetWind = function (partSys) {
         } else partSys.s0[pOff + PART_ZVEL] -= (0.8 + 0.8 * Math.random()) * INIT_VEL;
     }
 }
-VBObox10.prototype.resetSpring = function (partSys) {
+FluidVBObox.prototype.resetSpring = function (partSys) {
     for (var i = 1; i < partSys.partCount; i++) {
         var pOff = i * PART_MAXVAR;			// starting index of each particle
         partSys.s0[pOff + PART_ZPOS] -= springRun * (.002 * Math.pow(i, 2));
