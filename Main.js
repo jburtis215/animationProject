@@ -78,9 +78,10 @@ const PART_PRESSURE = 27;
 const PART_VOX_X = 28;
 const PART_VOX_Y = 29;
 const PART_VOX_Z = 30;
+const PART_VOX_LIST = 31;
 
 
-const PART_MAXVAR = 31;  // Size of array in CPart uses to store its values.
+const PART_MAXVAR = 32;  // Size of array in CPart uses to store its values.
 
 const F_NONE = 0;       // Non-existent force: ignore this CForcer object
 const F_MOUSE = 1;       // Spring-like connection to the mouse cursor; lets

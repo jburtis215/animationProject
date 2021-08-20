@@ -149,6 +149,40 @@ findViscosity = function (s, partCount) {
     }
 }
 
+
+sortVoxels = function (s0, count, voxelList) {
+    let voxelsPerAxis = 4
+    let voxelCoreSize = axisSize / voxelsPerAxis
+    let buffer = h
+
+    function findVoxelIndicesForAxis(position) {
+        let xVoxels = []
+        for (let j = 0; j < 4; j++) {
+            if (position > j * voxelCoreSize - buffer && position < (j + 1) * voxelCoreSize + buffer) {
+                xVoxels.push(j)
+            }
+        }
+        return xVoxels;
+    }
+
+    for (let i = 0; i < this.partCount; i++) {
+        var pOff = i * PART_MAXVAR;
+
+        var xPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_XPOS]);
+        var yPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_YPOS]);
+        var zPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_ZPOS]);
+        for (let xPos = 0; xPos < xPositions.length; xPos++) {
+            for (let yPos = 0; yPos < yPositions.length; yPos++) {
+                for (let zPos = 0; zPos < zPositions.length; zPos++) {
+                    let num = (xPositions[xPos] * voxelsPerAxis) + (yPositions[yPos] * voxelsPerAxis ^ 2) + (zPositions[zPos] * voxelsPerAxis ^ 3);
+                    voxelList[num].push(pOff)
+                    s0[pOff + PART_VOX_LIST].push(num);
+                }
+            }
+        }
+    }
+}
+
 sameVoxel = function (s0, ind1, ind2) {
     return (Math.abs(s0[ind1 + PART_VOX_X] - s0[ind2 + PART_VOX_X]) <= 1) &&
         (Math.abs(s0[ind1 + PART_VOX_Y] - s0[ind2 + PART_VOX_Y]) <= 1) &&
@@ -161,6 +195,7 @@ PartSys.prototype.ForceField = function () {
     this.maxDensity = 1;
     this.minDensity = 1000000;
     var doit = 1;
+    this.voxelList = createArray(this.partCount, 4)
     this.s0 = new Float32Array(this.partCount * PART_MAXVAR);
     this.s0dot = new Float32Array(this.partCount * PART_MAXVAR);
     this.s1 = new Float32Array(this.partCount * PART_MAXVAR);
@@ -259,7 +294,8 @@ PartSys.prototype.ForceField = function () {
         },
         function (count, s) {
         },
-        function (count, s) {
+        function (count, s, voxelList) {
+            sortVoxels(s, count, voxelList)
             let densities = findDensity(s, count);
             findPressureForce(s, count);
             //      findViscosity(s, count);

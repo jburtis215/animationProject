@@ -224,7 +224,7 @@ FluidVBObox.prototype.applyForces = function (mygl, partSys) {
         partSys.cforcer[F_BUBBLE](partSys.partCount, partSys.s0);
         partSys.cforcer[F_DRAG](partSys.partCount, partSys.s0);
         partSys.cforcer[F_SPRING](partSys.partCount, partSys.s0);
-        let results = partSys.cforcer[F_SPH](partSys.partCount, partSys.s0);
+        let results = partSys.cforcer[F_SPH](partSys.partCount, partSys.s0, partSys.voxelList);
         partSys.cforcer[F_CHARGE](partSys.partCount, partSys.s0);
         partSys.cforcer[F_FIRE](partSys.partCount, partSys.s0);
 
@@ -518,4 +518,16 @@ FluidVBObox.prototype.resetSpring = function (partSys) {
         var pOff = i * PART_MAXVAR;			// starting index of each particle
         partSys.s0[pOff + PART_ZPOS] -= springRun * (.002 * Math.pow(i, 2));
     }
+}
+
+function createArray(length) {
+    var arr = new Array(length || 0),
+        i = length;
+
+    if (arguments.length > 1) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        while(i--) arr[length-1 - i] = createArray.apply(this, args);
+    }
+
+    return arr;
 }
