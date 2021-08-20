@@ -135,19 +135,9 @@ gndVerts = new Float32Array(floatsPerVertex * (2 * (xcount + ycount) + 24));
 makeGroundGrid();
 // For multiple VBOs & Shaders:-----------------
 worldBox = new VBObox0();		  // Holds VBO & shaders for drawing world surfaces;
-part1Box = new VBObox1();		  // "  "  for drawing 1st particle system
-part2Box = new VBObox2();     // "  "  for drawing 2nd particle system
 fluidParticleBox = new FluidVBObox();
-part4Box = new VBObox9();
-part5Box = new VBObox5();
-part6Box = new VBObox6();
-part7Box = new VBObox7();
 
 partSys1 = new PartSys();
-partSys2 = new PartSys();
-partSys3 = new PartSys();
-partSys4 = new PartSys();
-partSys5 = new PartSys();
 
 var g_last = Date.now();				//  Timestamp: set after each frame of animation,
 // used by 'animate()' function to find how much
@@ -300,13 +290,7 @@ function main() {
     // Initialize each of our 'vboBox' objects:
     worldBox.init(gl);		// VBO + shaders + uniforms + attribs for our 3D world,
                               // including ground-plane,
-  // part1Box.init(gl);		//  "		"		"  for 1st particle system in the 3D world
-    //part2Box.init(gl);    //  "   "   "  for 2nd particle system in the 3D world
     fluidParticleBox.init(gl);
-    //part4Box.init(gl);
-  //  part5Box.init(gl);
-   // part6Box.init(gl);
-   // part7Box.init(gl);
     gl.clearColor(0, 0, 0, 1);	  // RGBA color for clearing <canvas>
 
     // ==============ANIMATION=============
@@ -335,11 +319,6 @@ function main() {
         zCamPos = animateZPos(zCamPos);
         g_currentAngle = makeSpin(g_currentAngle);  // Update the rotation angle
         zlook = animatez(zlook);
-        if (g_show3 == 1) fluidParticleBox.resetSpring(partSys5);
-        if (g_show4 == 1) part4Box.resetSpring(partSys5);
-        if (g_show5 == 1) part5Box.resetSpring(partSys5);
-        if (g_show6 == 1) part6Box.resetSpring(partSys5);
-        if (g_show7 == 1) part7Box.resetSpring(partSys5);
 
         //    draw(gl, myVerts, currentAngle, modelMatrix, u_ModelMatrix);
         draw();	// compute new particle state at current time
@@ -369,19 +348,6 @@ function draw() {
     if (g_show0 == 1) {	// IF user didn't press HTML button to 'hide' VBO0:
         worldBox.adjust(gl);		// Send new values for uniforms to the GPU, and
         worldBox.draw(gl);			// draw our VBO's contents using our shaders.
-    }
-
-    if (g_show1 == 1) { // IF user didn't press HTML button to 'hide' VBO1:
-        part1Box.adjust(gl);		// Send new values for uniforms to the GPU, and
-        part1Box.PartSys_render(gl);			// draw our VBO's contents using our shaders.
-    }
-
-//PartSys_render
-
-
-    if (g_show2 == 1) { // IF user didn't press HTML button to 'hide' VBO2:
-        part2Box.adjust(gl);		// Send new values for uniforms to the GPU, and
-        part2Box.draw(gl);			// draw our VBO's contents using our shaders.
     }
 
     if (g_show3 == 1) {
@@ -414,123 +380,6 @@ function draw() {
 
     }
 
-    if (g_show4 == 1) {
-
-        //	part3Box.adjust(gl);
-        //part3Box.PartSys_render(gl);
-        //}
-        /*
-        part3Box.applyForces(gl);
-      part3Box.dotFinder(gl);
-      part3Box.render(gl);
-      part3Box.PartSys_constrain();
-      part3Box.PartSys_render(gl);
-      */
-        if (part1 == 1) {
-            part4Box.adjust1(gl, partSys1);
-        }
-        if (part2 == 1) {
-            part4Box.adjust1(gl, partSys2);
-        }
-        if (part3 == 1) {
-            part4Box.adjust1(gl, partSys3);
-        }
-        if (part4 == 1) {
-            part4Box.adjust1(gl, partSys4);
-        }
-        if (part5 == 1) {
-            part4Box.adjust1(gl, partSys5);
-        }
-
-    }
-
-    if (g_show5 == 1) {
-
-        //	part3Box.adjust(gl);
-        //part3Box.PartSys_render(gl);
-        //}
-        /*
-        part3Box.applyForces(gl);
-      part3Box.dotFinder(gl);
-      part3Box.render(gl);
-      part3Box.PartSys_constrain();
-      part3Box.PartSys_render(gl);
-      */
-        if (part1 == 1) {
-            part5Box.adjust1(gl, partSys1);
-        }
-        if (part2 == 1) {
-            part5Box.adjust1(gl, partSys2);
-        }
-        if (part3 == 1) {
-            part5Box.adjust1(gl, partSys3);
-        }
-        if (part4 == 1) {
-            part5Box.adjust1(gl, partSys4);
-        }
-        if (part5 == 1) {
-            part5Box.adjust1(gl, partSys5);
-        }
-
-    }
-    if (g_show6 == 1) {
-
-        //	part3Box.adjust(gl);
-        //part3Box.PartSys_render(gl);
-        //}
-        /*
-        part3Box.applyForces(gl);
-      part3Box.dotFinder(gl);
-      part3Box.render(gl);
-      part3Box.PartSys_constrain();
-      part3Box.PartSys_render(gl);
-      */
-        if (part1 == 1) {
-            part6Box.adjust1(gl, partSys1);
-        }
-        if (part2 == 1) {
-            part6Box.adjust1(gl, partSys2);
-        }
-        if (part3 == 1) {
-            part6Box.adjust1(gl, partSys3);
-        }
-        if (part4 == 1) {
-            part6Box.adjust1(gl, partSys4);
-        }
-        if (part5 == 1) {
-            part6Box.adjust1(gl, partSys5);
-        }
-
-    }
-    if (g_show7 == 1) {
-
-        //	part3Box.adjust(gl);
-        //part3Box.PartSys_render(gl);
-        //}
-        /*
-        part3Box.applyForces(gl);
-      part3Box.dotFinder(gl);
-      part3Box.render(gl);
-      part3Box.PartSys_constrain();
-      part3Box.PartSys_render(gl);
-      */
-        if (part1 == 1) {
-            part7Box.adjust1(gl, partSys1);
-        }
-        if (part2 == 1) {
-            part7Box.adjust1(gl, partSys2);
-        }
-        if (part3 == 1) {
-            part7Box.adjust1(gl, partSys3);
-        }
-        if (part4 == 1) {
-            part7Box.adjust1(gl, partSys4);
-        }
-        if (part5 == 1) {
-            part7Box.adjust1(gl, partSys5);
-        }
-
-    }
 }
 
 function VBO0toggle() {

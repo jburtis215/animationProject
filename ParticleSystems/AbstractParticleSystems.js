@@ -225,6 +225,14 @@ PartSys.prototype.ForceField = function () {
     this.sm = this.s0.slice(0);
     this.s2 = this.s0.slice(0);
 
+    function calculateFrictionForce(i, s) {
+        var pOff = i * PART_MAXVAR;
+        s[pOff + PART_X_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_XVEL] / 2);
+        s[pOff + PART_Y_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_YVEL] / 2);
+        s[pOff + PART_Z_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_ZVEL] / 2);
+        return pOff;
+    }
+
     this.cforcer = [
         function (count, s) {
         },
@@ -245,11 +253,8 @@ PartSys.prototype.ForceField = function () {
         function (count, s) {
         },
         function (count, s) {
-            for (var i = 0; i < count; i++) {
-                var pOff = i * PART_MAXVAR;
-                s[pOff + PART_X_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_XVEL] / 2);
-                s[pOff + PART_Y_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_YVEL] / 2);
-                s[pOff + PART_Z_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_ZVEL] / 2);
+            for (var index = 0; index < count; index++) {
+                calculateFrictionForce(index, s);
             }
         },
         function (count, s) {

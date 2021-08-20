@@ -612,41 +612,9 @@ VBObox0.prototype.myKeyPress = function (ev, partSys) {
             if (g_show3 == 1) {
                 fluidParticleBox.reset(partSys1);
             }
-            if (g_show4 == 1) {
-                part4Box.reset(partSys1);
-                break;
-            }
-            if (g_show5 == 1) {
-                part5Box.reset(partSys1);
-                break;
-            }
-            if (g_show6 == 1) {
-                part6Box.reset(partSys1);
-                break;
-            }
-            if (g_show7 == 1) {
-                part7Box.reset(partSys1);
-                break;
-            }
         case 'z':
             if (g_show3 == 1) {
                 fluidParticleBox.resetWind(partSys2);
-            }
-            if (g_show4 == 1) {
-                part4Box.resetWind(partSys2);
-                break;
-            }
-            if (g_show5 == 1) {
-                part5Box.resetWind(partSys2);
-                break;
-            }
-            if (g_show6 == 1) {
-                part6Box.resetWind(partSys2);
-                break;
-            }
-            if (g_show7 == 1) {
-                part7Box.resetWind(partSys2);
-                break;
             }
         case 'v':
         case 'V':
