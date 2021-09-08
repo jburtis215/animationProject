@@ -8,32 +8,33 @@ findPressureForce = function (s, partCount) {
             let pOff = i * PART_MAXVAR;
             if (sameVoxel(s, p, pOff)) {
                 if (pOff !== p) {
-                    let xDist = s[p + PART_XPOS] - s[pOff + PART_XPOS];
-                    //   xDist = xDist === 0? epsilon: xDist;
-                    let yDist = s[p + PART_YPOS] - s[pOff + PART_YPOS];
-                    // yDist = yDist === 0? epsilon: yDist;
-                    let zDist = s[p + PART_ZPOS] - s[pOff + PART_ZPOS];
-                    // zDist = zDist === 0? epsilon: zDist;
-                    let realDistance = Math.sqrt(Math.pow(xDist, 2) +
-                        Math.pow(yDist, 2) +
-                        Math.pow(zDist, 2))
-                    let totalDistance = Math.abs(xDist) + Math.abs(yDist) + Math.abs(zDist);
+                    let {xDist, yDist, zDist, realDistance} = calculateDistances(s, p, pOff);
                     if (realDistance < 2 * h) {
+                        //Kernel function = 45 * (2 - (r)^2)
+                        //                    (64 *pi)
+                       // let kernelDer = -15 * (Math.pow(h - realDistance, 3))/ (Math.PI * Math.pow(h, 6)); //
                         let kernelDer = -45 * (2 - Math.pow((realDistance / h), 2)) / (64 * h * Math.PI);
 
-                        for (var pos = 0; pos < 3; pos++) {
-                            let distance = s[p + pos] - s[pOff + pos];
-                            let distanceComponent = distance / realDistance;
+                        let xdistanceComponent = xDist / realDistance;
                          //   if (distance > 0) {
-                                firstComponent[pos] += s[pOff + PART_MASS] * kernelDer * (-1 * distanceComponent);
-                                secondComponent[pos] += s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / ((s[pOff + PART_DENSITY] * (s[pOff + PART_DENSITY])))) * kernelDer * (-1 * distanceComponent);
-                           //      }
+                        firstComponent[0] += s[pOff + PART_MASS] * kernelDer * (-1 * xdistanceComponent);
+                        secondComponent[0] += s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / ((s[pOff + PART_DENSITY] * (s[pOff + PART_DENSITY])))) * kernelDer * (-1 * xdistanceComponent);
+                        let ydistanceComponent = yDist / realDistance;
+                        //   if (distance > 0) {
+                        firstComponent[1] += s[pOff + PART_MASS] * kernelDer * (-1 * ydistanceComponent);
+                        secondComponent[1] += s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / ((s[pOff + PART_DENSITY] * (s[pOff + PART_DENSITY])))) * kernelDer * (-1 * ydistanceComponent);
+
+                        let zdistanceComponent = zDist / realDistance;
+                        //   if (distance > 0) {
+                        firstComponent[2] += s[pOff + PART_MASS] * kernelDer * (-1 * zdistanceComponent);
+                        secondComponent[2] += s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / ((s[pOff + PART_DENSITY] * (s[pOff + PART_DENSITY])))) * kernelDer * (-1 * zdistanceComponent);
+
+                        //      }
                          /*   else{
                                  firstComponent[pos] -= s[pOff + PART_MASS] * kernelDer * distanceComponent;
                                secondComponent[pos] -= s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / (s[pOff + PART_DENSITY])) * kernelDer * distanceComponent;
                             }*/
 
-                        }
                     }
                 }
             }
@@ -45,4 +46,12 @@ findPressureForce = function (s, partCount) {
         s[p + PART_Z_FTOT] += coefficient * ((firstDensCo * firstComponent[2]) + secondComponent[2]);
   //            console.log('x ' + s[p + PART_X_FTOT] + '\ny ' + s[p + PART_Y_FTOT] + '\nz ' + s[p + PART_Z_FTOT]);
     }
+
+
+    // Ideas: calculate current pressure and calculate pressure gradient using that
+    //   current pressure = speed of sound ^ 2 * (density - goal density)
+    // sum all
+    //      FPij = - mj/densej * ( pi / densei^2  + pj/densej^2) * kernel
+
+    //current formula  -mass * kernel * (dense - goalDense/ dense^2)
 }
