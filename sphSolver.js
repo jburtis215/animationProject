@@ -224,7 +224,7 @@ FluidVBObox.prototype.applyForces = function (mygl, partSys) {
         partSys.cforcer[F_BUBBLE](partSys.partCount, partSys.s0);
         partSys.cforcer[F_DRAG](partSys.partCount, partSys.s0);
         partSys.cforcer[F_SPRING](partSys.partCount, partSys.s0);
-        let results = partSys.cforcer[F_SPH](partSys.partCount, partSys.s0, partSys.voxelList);
+        let results = partSys.cforcer[F_SPH](partSys.partCount, partSys.s0);
         partSys.cforcer[F_CHARGE](partSys.partCount, partSys.s0);
         partSys.cforcer[F_FIRE](partSys.partCount, partSys.s0);
 
@@ -487,16 +487,9 @@ FluidVBObox.prototype.PartSys_render = function (myGL, partSys) {
 FluidVBObox.prototype.reset = function (partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
-        var pOff = i * PART_MAXVAR;			// starting index of each particle
-        if (partSys.s0[pOff + PART_XVEL] > 0) {
-            partSys.s0[pOff + PART_XVEL] += (0.02 + 0.08 * Math.random()) * INIT_VEL;
-        } else partSys.s0[pOff + PART_XVEL] -= (0.02 + 0.08 * Math.random()) * INIT_VEL;
-        if (partSys.s0[pOff + PART_YVEL] > 0) {
-            partSys.s0[pOff + PART_YVEL] += (0.02 + 0.08 * Math.random()) * INIT_VEL;
-        } else partSys.s0[pOff + PART_YVEL] += (0.02 + 0.08 * Math.random()) * INIT_VEL;
-        if (partSys.s0[pOff + PART_ZVEL] < 0) {
-            partSys.s0[pOff + PART_ZVEL] -= (0.02 + 0.08 * Math.random()) * INIT_VEL;
-        } else partSys.s0[pOff + PART_ZVEL] += (0.02 + 0.08 * Math.random()) * INIT_VEL;
+        partSys.s0[pOff + PART_XVEL] += (-0.5 + Math.random()) * .02;
+        partSys.s0[pOff + PART_YVEL] += (-0.5 + Math.random()) * .02;
+        partSys.s0[pOff + PART_ZVEL] += (-0.5 + Math.random()) * .02;
     }
 }
 FluidVBObox.prototype.resetWind = function (partSys) {
