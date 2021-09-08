@@ -124,6 +124,7 @@ var g_currentAngle = 0;
 
 var k = 100;
 
+var voxelsPerAxis = 4
 var speedOfSound = 1000;
 
 var floatsPerVertex = 7;
@@ -660,4 +661,10 @@ function roundRand3D() {
     while (xball * xball + yball * yball + zball * zball >= 1.0);	// keep 1st point inside sphere.
     ret = new Array(xball, yball, zball);
     return ret;
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
