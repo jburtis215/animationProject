@@ -56,7 +56,7 @@ sameVoxel = function (s0, ind1, ind2) {
 
 
 PartSys.prototype.ForceField = function () {
-    this.partCount = 2;// partsPerAxis * ((partsPerAxis - 1) * 2);
+    this.partCount =  partsPerAxis * ((partsPerAxis - 1) * 2);
     this.maxDensity = 1;
     this.minDensity = 1000000;
     var doit = 1;
