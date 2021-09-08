@@ -3,199 +3,63 @@ function PartSys() {
     this.s0dot = new Float32Array(this.partCount * PART_MAXVAR);
 }
 
-findDensity = function (s, partCount) {
-    let maxDensity = 0;
-    let minDensity = 100000;
-    for (let j = 0; j < partCount; j++) {
-      //  console.log("new particle");
-        var totDensity = 1;
-        let p = j * PART_MAXVAR;
-        for (let i = 0; i < partCount; i++) {
-            let pOff = i * PART_MAXVAR;
-            if (sameVoxel(s, p, pOff)) {
-                if (pOff !== p) {
-                    let xDist = s[p + PART_XPOS] - s[pOff + PART_XPOS];
-                    let yDist = s[p + PART_YPOS] - s[pOff + PART_YPOS];
-                    let zDist = s[p + PART_ZPOS] - s[pOff + PART_ZPOS];
-                    let realDistance = Math.sqrt(Math.pow(xDist, 2) +
-                        Math.pow(yDist, 2) +
-                        Math.pow(zDist, 2))
-                    realDistance = realDistance === 0 ? epsilon : realDistance;
-                    if (realDistance < 2 * h) {
-                        let kernel = kernelCoefficient * Math.pow((2 - (realDistance / h)), 3);
-                        totDensity += kernel * s[pOff + PART_MASS];
-            //            console.log("distance:" + realDistance);
-              //          console.log(kernel * s[pOff + PART_MASS]);
-                    }
-                }
-            }
-        }
-        s[p + PART_DENSITY] = totDensity;
-      //  console.log(totDensity);
-        if (maxDensity < totDensity) {
-            maxDensity = totDensity;
-        }
-        if (minDensity > totDensity) {
-            minDensity = totDensity;
-        }
-    }
-    return [minDensity, maxDensity];
-}
 
-findPressureForce = function (s, partCount) {
-
-    for (let j = 0; j < partCount; j++) {
-        let p = j * PART_MAXVAR;
-        var firstComponent = [0, 0, 0];
-        var secondComponent = [0, 0, 0];
-        for (let i = 0; i < partCount; i++) {
-            let pOff = i * PART_MAXVAR;
-            if (sameVoxel(s, p, pOff)) {
-                if (pOff !== p) {
-                    let xDist = s[p + PART_XPOS] - s[pOff + PART_XPOS];
-                    //   xDist = xDist === 0? epsilon: xDist;
-                    let yDist = s[p + PART_YPOS] - s[pOff + PART_YPOS];
-                    // yDist = yDist === 0? epsilon: yDist;
-                    let zDist = s[p + PART_ZPOS] - s[pOff + PART_ZPOS];
-                    // zDist = zDist === 0? epsilon: zDist;
-                    let realDistance = Math.sqrt(Math.pow(xDist, 2) +
-                        Math.pow(yDist, 2) +
-                        Math.pow(zDist, 2))
-                    let totalDistance = Math.abs(xDist) + Math.abs(yDist) + Math.abs(zDist);
-                    if (realDistance < 2 * h) {
-                        let kernelDer = -45 * (2 - Math.pow((realDistance / h), 2)) / (64 * h * Math.PI);
-
-                        for (var pos = 0; pos < 3; pos++) {
-                            let distance = s[p + pos] - s[pOff + pos];
-                            let distanceComponent = distance / realDistance;
-                         //   if (distance > 0) {
-                                firstComponent[pos] += s[pOff + PART_MASS] * kernelDer * (-1 * distanceComponent);
-                                secondComponent[pos] += s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / ((s[pOff + PART_DENSITY] * (s[pOff + PART_DENSITY])))) * kernelDer * (-1 * distanceComponent);
-                           //      }
-                         /*   else{
-                                 firstComponent[pos] -= s[pOff + PART_MASS] * kernelDer * distanceComponent;
-                               secondComponent[pos] -= s[pOff + PART_MASS] * ((s[pOff + PART_DENSITY] - DENSITY_CONST) / (s[pOff + PART_DENSITY])) * kernelDer * distanceComponent;
-                            }*/
-
-                        }
-                    }
-                }
-            }
-        }
-        let coefficient = k * s[p + PART_MASS];
-        let firstDensCo = ((s[p + PART_DENSITY] - DENSITY_CONST) / (s[p + PART_DENSITY]* s[p + PART_DENSITY]));
-        s[p + PART_X_FTOT] += coefficient * ((firstDensCo * firstComponent[0]) + secondComponent[0]);
-        s[p + PART_Y_FTOT] += coefficient * ((firstDensCo * firstComponent[1]) + secondComponent[1]);
-        s[p + PART_Z_FTOT] += coefficient * ((firstDensCo * firstComponent[2]) + secondComponent[2]);
-  //            console.log('x ' + s[p + PART_X_FTOT] + '\ny ' + s[p + PART_Y_FTOT] + '\nz ' + s[p + PART_Z_FTOT]);
-    }
-}
-
-findViscosity = function (s, partCount) {
-    for (let j = 0; j < partCount; j++) {
-        var p = j * PART_MAXVAR;
-        var totViscosity = [0, 0, 0];
-        for (let i = 0; i < partCount; i++) {
-            var pOff = i * PART_MAXVAR;
-            if (sameVoxel(s, p, pOff)) {
-                if (pOff !== p) {
-                    let xDist = s[p + PART_XPOS] - s[pOff + PART_XPOS];
-                    xDist = xDist === 0 ? epsilon : xDist;
-                    let yDist = s[p + PART_YPOS] - s[pOff + PART_YPOS];
-                    yDist = yDist === 0 ? epsilon : yDist;
-                    let zDist = s[p + PART_ZPOS] - s[pOff + PART_ZPOS];
-                    zDist = zDist === 0 ? epsilon : zDist;
-                    let realDistance = Math.sqrt(Math.pow(xDist, 2) +
-                        Math.pow(yDist, 2) +
-                        Math.pow(zDist, 2))
-                    let u = h * (s[p + PART_XVEL] - s[pOff + PART_XVEL]) * realDistance / ((Math.pow(realDistance, 2)) + h * h / 100)
-                    if (u < 0) {
-                        let totalOfInverseDistances = (xDist === 0 ? 1 : 1 / Math.abs(xDist))
-                            + (yDist === 0 ? 1 : 1 / Math.abs(yDist))
-                            + (zDist === 0 ? 1 : 1 / Math.abs(zDist));
-
-                        let totalDistance = Math.abs(xDist) + Math.abs(yDist) + Math.abs(zDist);
-                        let kernelDer = -45 * (2 - Math.pow((realDistance / h), 2)) / (64 * h * Math.PI);
-
-                        for (var pos = 0; pos < 3; pos++) {
-                            let distance = s[p + pos] - s[pOff + pos];
-                            let distanceComponent = distance / totalDistance;
-                            let pForce = (s[p + PART_DENSITY] + s[pOff + PART_DENSITY]) / 2
-                            let force = (-speedOfSound * u + 2 * u * u) / pForce
-                            totViscosity[pos] += s[pOff + PART_MASS] * force * kernelDer * distanceComponent;
-                        }
-                        /*
-                                                for (let pos = 0; pos < 3; pos++) {
-                                                    let distance = s[p + pos] - s[pOff + pos];
-                                                    let inverseDistance = (distance === 0 ? 1 : 1 / Math.abs(distance));
-                                                    let distanceComponent = inverseDistance / totalOfInverseDistances;
-                                                    let pForce = (s[p + PART_DENSITY] + s[pOff + PART_DENSITY]) / 2
-                                                    let force = (-speedOfSound * u + 2 * u * u) / pForce
-                                                    if (distance < 0) {
-                                                        totViscosity[pos] -= s[pOff + PART_MASS] * force * kernelDer * distanceComponent;
-                                                    }else{
-                                                        totViscosity[pos] += s[pOff + PART_MASS] * force * kernelDer * distanceComponent;
-                                                    }
-                                                }*/
-
-                    }
-                }
-            }
-        }
-        s[p + PART_X_FTOT] -= s[p + PART_MASS] * totViscosity[0];
-        s[p + PART_Y_FTOT] -= s[p + PART_MASS] * totViscosity[1];
-        s[p + PART_Z_FTOT] -= s[p + PART_MASS] * totViscosity[2];
-        console.log('x ' + s[p + PART_MASS] * totViscosity[0] + 'y ' + s[p + PART_MASS] * totViscosity[1] + 'z ' + s[p + PART_MASS] * totViscosity[2])
-    }
-}
-
-
-sortVoxels = function (s0, count, voxelList) {
-    let voxelsPerAxis = 4
+sortVoxels = function (s0, count) {
     let voxelCoreSize = axisSize / voxelsPerAxis
     let buffer = h
 
-    function findVoxelIndicesForAxis(position) {
-        let xVoxels = []
+    function findVoxelNumberForAxis(position) {
         for (let j = 0; j < 4; j++) {
-            if (position > j * voxelCoreSize - buffer && position < (j + 1) * voxelCoreSize + buffer) {
-                xVoxels.push(j)
-            }
-        }
-        return xVoxels;
-    }
-
-    for (let i = 0; i < this.partCount; i++) {
-        var pOff = i * PART_MAXVAR;
-
-        var xPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_XPOS]);
-        var yPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_YPOS]);
-        var zPositions = findVoxelIndicesForAxis.call(s0[pOff + PART_ZPOS]);
-        for (let xPos = 0; xPos < xPositions.length; xPos++) {
-            for (let yPos = 0; yPos < yPositions.length; yPos++) {
-                for (let zPos = 0; zPos < zPositions.length; zPos++) {
-                    let num = (xPositions[xPos] * voxelsPerAxis) + (yPositions[yPos] * voxelsPerAxis ^ 2) + (zPositions[zPos] * voxelsPerAxis ^ 3);
-                    voxelList[num].push(pOff)
-                    s0[pOff + PART_VOX_LIST].push(num);
+            if (position >= j * voxelCoreSize) {
+                if (position < (j + 1) * voxelCoreSize) {
+                    return j * 2;
+                } else if (position < (j + 1) * voxelCoreSize + buffer) {
+                    return j * 2 + 1;
                 }
             }
         }
+        return -1;
+    }
+
+    for (let i = 0; i < count; i++) {
+        var pOff = i * PART_MAXVAR;
+
+
+        var totalIndices = voxelsPerAxis + voxelsPerAxis - 1;
+        var xPos = findVoxelNumberForAxis(s0[pOff + PART_XPOS]);
+        var yPos = findVoxelNumberForAxis(s0[pOff + PART_YPOS]);
+        var zPos = findVoxelNumberForAxis(s0[pOff + PART_ZPOS]);
+        let num = xPos + (yPos * totalIndices) + (zPos * Math.pow(totalIndices, 2));
+        //voxelList[num].push(pOff)
+        s0[pOff + PART_VOX_LIST] = num;
+
+        //[0,3,2] - 0 + 21 + 98 = 119
+        //  119 remainder 7 - 0     Math.floor((119 rem 49) / 7)  + Math.floor(119/49)
     }
 }
 
 sameVoxel = function (s0, ind1, ind2) {
-    return (Math.abs(s0[ind1 + PART_VOX_X] - s0[ind2 + PART_VOX_X]) <= 1) &&
-        (Math.abs(s0[ind1 + PART_VOX_Y] - s0[ind2 + PART_VOX_Y]) <= 1) &&
-        (Math.abs(s0[ind1 + PART_VOX_Z] - s0[ind2 + PART_VOX_Z]) <= 1)
+    const totalIndices = voxelsPerAxis + voxelsPerAxis - 1;
+    let part1XVox = s0[ind1 + PART_VOX_LIST] % totalIndices;
+    let part2XVox = s0[ind2 + PART_VOX_LIST] % totalIndices;
+    let xVoxelDistance = Math.abs(part1XVox - part2XVox);
+    let part1YVox = Math.floor(s0[ind1 + PART_VOX_LIST] % (Math.pow(totalIndices, 2)) / totalIndices);
+    let part2YVox = Math.floor(s0[ind2 + PART_VOX_LIST] % (Math.pow(totalIndices, 2)) / totalIndices);
+    let yVoxelDistance = Math.abs(part1YVox - part2YVox);
+    let part1ZVox = Math.floor(s0[ind1 + PART_VOX_LIST] / (Math.pow(totalIndices, 2)));
+    let part2ZVox = Math.floor(s0[ind2 + PART_VOX_LIST] / (Math.pow(totalIndices, 2)));
+    let zVoxelDistance = Math.abs(part1ZVox - part2ZVox);
+    return xVoxelDistance <= 1
+        && yVoxelDistance <= 1
+        && zVoxelDistance <= 1;
 }
 
 
 PartSys.prototype.ForceField = function () {
-    this.partCount = partsPerAxis * ((partsPerAxis - 1) * 2);
+    this.partCount = 2;// partsPerAxis * ((partsPerAxis - 1) * 2);
     this.maxDensity = 1;
     this.minDensity = 1000000;
     var doit = 1;
-    this.voxelList = createArray(this.partCount, 4)
     this.s0 = new Float32Array(this.partCount * PART_MAXVAR);
     this.s0dot = new Float32Array(this.partCount * PART_MAXVAR);
     this.s1 = new Float32Array(this.partCount * PART_MAXVAR);
@@ -207,7 +71,7 @@ PartSys.prototype.ForceField = function () {
     this.s2 = new Float32Array(this.partCount * PART_MAXVAR);
     this.first = 0;
 
-    for (var i = 0; i < this.partCount; i++) {
+    for (let i = 0; i < this.partCount; i++) {
         var pOff = i * PART_MAXVAR;			// starting index of each particle
         var xcyc = roundRand3D();
         if (doit == 1) {
@@ -294,8 +158,8 @@ PartSys.prototype.ForceField = function () {
         },
         function (count, s) {
         },
-        function (count, s, voxelList) {
-            sortVoxels(s, count, voxelList)
+        function (count, s) {
+            sortVoxels(s, count)
             let densities = findDensity(s, count);
             findPressureForce(s, count);
             //      findViscosity(s, count);
