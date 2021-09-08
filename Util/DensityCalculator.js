@@ -26,6 +26,7 @@ findDensity = function (s, partCount) {
             }
         }
         s[p + PART_DENSITY] = totDensity;
+        s[p + PART_PRESSURE] = Math.pow(speedOfSound, 2) * (totDensity - DENSITY_CONST);
       //  console.log(totDensity);
         if (maxDensity < totDensity) {
             maxDensity = totDensity;
