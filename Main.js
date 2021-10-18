@@ -104,10 +104,10 @@ const F_MAXKINDS = 11;      // 'max' is always the LAST name in our list;
                             // gives the total number of choices for forces.
 var partsPerAxis = Math.ceil(1/0.0899671);
 
-const interval = 0.0890671;
-const half_interval = 0.0890671 / 2;
+const interval = 1/partsPerAxis;//0.0890671;
+const half_interval = interval/2;//0.0890671 / 2;
 const axisSize = 1.0;
-const h = .05;// * axisSize / (partsPerAxis-1);//(1 + ((Math.sqrt(2)-1)/2)) * (2/(2*partsPerAxis));
+const h = .5;// * axisSize / (partsPerAxis-1);//(1 + ((Math.sqrt(2)-1)/2)) * (2/(2*partsPerAxis));
 
 const kernelCoefficient = 15/(Math.PI * 4*h*4*h*4*h);
 const kernelNormalizer = kernelCoefficient * 8;
@@ -124,14 +124,14 @@ var g_currentAngle = 0;
 
 var k = 100;
 
-var voxelsPerAxis = 4
+var voxelsPerAxis = 1
 var speedOfSound = 1000;
 
 var floatsPerVertex = 7;
 var xcount = 1000;			// # of lines to draw in x,y to make the grid.
 var ycount = 1000;
 
-var DENSITY_CONST = 997;//9*((4/3)*Math.PI*(Math.pow(h, 3)))
+var DENSITY_CONST = 13;//9*((4/3)*Math.PI*(Math.pow(h, 3)))
 gndVerts = new Float32Array(floatsPerVertex * (2 * (xcount + ycount) + 24));
 
 makeGroundGrid();
@@ -155,7 +155,7 @@ var INIT_VEL = 0.15 * 60.0;		// initial velocity in meters/sec.
 // was 0.15 meters per timestep; multiply by 60 to get
 // meters per second.
 // timesteps per second.
-var g_drag = 0.985;			// units-free air-drag (scales velocity); adjust by d/D keys
+var g_drag = 0.485;			// units-free air-drag (scales velocity); adjust by d/D keys
 var g_grav = 9.832;			// gravity's acceleration; adjust by g/G keys
 // on Earth surface: 9.832 meters/sec^2.
 var g_resti = 1.0;			// units-free 'Coefficient of restitution' for 
@@ -202,11 +202,11 @@ var timeStep = 1.7/1000;			// current timestep (1/60th sec) in milliseconds
 
 MvpMat = new Matrix4();		// Transforms CVV axes to model axes.
 
-var xCamPos = .5;
-var yCamPos = .5;
-var zCamPos = 1.9;
-var currentAngle = 90;
-var zlook = -10;
+var xCamPos = .56;
+var yCamPos = 2.44;
+var zCamPos = 1.44;
+var currentAngle = 270;
+var zlook = -.6;
 var moveSpeed = 0;
 var moveSpeed2 = 0;
 var zMoveStep = 0;
@@ -313,8 +313,8 @@ function main() {
     //			to the ACTUAL time interval between displayed frames instead of fixed
     //		 	fixed-time 'setInterval()' calls that may take longer than expected.
     var tick = function () {
-  //      timeStep = animate();  // get time passed since last screen redraw.
-        timeStep = 16/1000;  // in seconds - JACK! CHANGE LATER
+        timeStep = animate();  // get time passed since last screen redraw.
+  //      timeStep = 16/1000;  // in seconds - JACK! CHANGE LATER
         currentAngle = animateA(currentAngle);
         xCamPos = animate2(xCamPos);
         yCamPos = animate3(yCamPos);

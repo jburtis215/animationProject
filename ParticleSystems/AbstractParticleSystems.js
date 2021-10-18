@@ -88,7 +88,7 @@ PartSys.prototype.ForceField = function () {
         this.s0[pOff + PART_R] = 0.2 + 0.8 * Math.random();
         this.s0[pOff + PART_G] = 0.2 + 0.8 * Math.random();
         this.s0[pOff + PART_B] = 0.2 + 0.8 * Math.random();
-        this.s0[pOff + PART_MASS] = 1;//+ 0.2 * Math.random();
+        this.s0[pOff + PART_MASS] = .1;//+ 0.2 * Math.random();
         this.s0[pOff + PART_DIAM] = 15;// + 10.0 * Math.random();
         this.s0[pOff + PART_RENDMODE] = Math.floor(4.0 * Math.random()); // 0,1,2 or 3.
         this.s0[pOff + PART_AGE] = 0;  // # of frame-times since creation/initialization
@@ -114,7 +114,7 @@ PartSys.prototype.ForceField = function () {
                 let pOff = index * PART_MAXVAR;
                 this.s0[pOff + PART_XPOS] = (odd === 0) ? interval * j : interval * j + half_interval;// + (epsilon * (1 * ((partsPerAxis - 1) / 2) - i));
                 this.s0[pOff + PART_YPOS] = half_interval * k;// + (epsilon * (1 * ((partsPerAxis - 1) / 2) - j));
-                this.s0[pOff + PART_ZPOS] = 0;//(axisSize / (partsPerAxis - 1)) * k + (epsilon * (1 * ((partsPerAxis - 1) / 2) - k));
+                this.s0[pOff + PART_ZPOS] = 0.5;//(axisSize / (partsPerAxis - 1)) * k + (epsilon * (1 * ((partsPerAxis - 1) / 2) - k));
                 index++;
             }
             odd = 1 - odd;
@@ -126,9 +126,11 @@ PartSys.prototype.ForceField = function () {
 
     function calculateFrictionForce(i, s) {
         var pOff = i * PART_MAXVAR;
-        s[pOff + PART_X_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_XVEL] / 2);
-        s[pOff + PART_Y_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_YVEL] / 2);
-        s[pOff + PART_Z_FTOT] -= (s[pOff + PART_DIAM] * s[pOff + PART_ZVEL] / 2);
+        let magnitude = Math.sqrt(s[pOff + PART_XVEL] * s[pOff + PART_XVEL] + s[pOff + PART_YVEL] * s[pOff + PART_YVEL] + s[pOff + PART_ZVEL] * s[pOff + PART_ZVEL]);
+        if ( magnitude !== 0 && s[pOff + PART_ZPOS] === 0) {
+            s[pOff + PART_X_FTOT] -= 9.8 * s[pOff + PART_MASS] * s[pOff + PART_XVEL] / magnitude;
+            s[pOff + PART_Y_FTOT] -= 9.8 * s[pOff + PART_MASS] * s[pOff + PART_YVEL] / magnitude;
+        }
         return pOff;
     }
 
@@ -162,7 +164,7 @@ PartSys.prototype.ForceField = function () {
             sortVoxels(s, count)
             let densities = findDensity(s, count);
             findPressureForce(s, count);
-            //      findViscosity(s, count);
+              //    findViscosity(s, count);
             let maxDensity = densities[1];
             let minDensity = densities[0];
             return [minDensity, maxDensity];
@@ -176,7 +178,7 @@ PartSys.prototype.ForceField = function () {
 
     this.c0 = [
         function (i, s1, s0) {
-            if (g_bounce == 0) { //--------------------------------------------------------
+            if (g_bounce === 0) { //--------------------------------------------------------
                 if (s1[i * PART_MAXVAR + PART_XPOS] < 0.0 && s1[i * PART_MAXVAR + PART_XVEL] < 0.0			// simple velocity-reversal
                 ) {		// bounce on left wall.
                     s1[i * PART_MAXVAR + PART_XVEL] = -g_resti * s1[i * PART_MAXVAR + PART_XVEL];
@@ -186,7 +188,7 @@ PartSys.prototype.ForceField = function () {
                 }
                 if (s1[i * PART_MAXVAR + PART_YPOS] < 0.0 && s1[i * PART_MAXVAR + PART_YVEL] < 0.0
                 ) {		// bounce on floor
-                    s1[i * PART_MAXVAR + PART_YVEL] = 0;//-g_resti * s1[i * PART_MAXVAR + PART_YVEL];
+                    s1[i * PART_MAXVAR + PART_YVEL] = -g_resti * s1[i * PART_MAXVAR + PART_YVEL];
                 } else if (s1[i * PART_MAXVAR + PART_YPOS] > axisSize && s1[i * PART_MAXVAR + PART_YVEL] > 0.0
                 ) {		// bounce on ceiling
                     s1[i * PART_MAXVAR + PART_YVEL] = -g_resti * s1[i * PART_MAXVAR + PART_YVEL];
@@ -200,26 +202,49 @@ PartSys.prototype.ForceField = function () {
                 }
                 //  -- hard limit on 'floor' keeps y position >= 0;
                 if (s1[i * PART_MAXVAR + PART_ZPOS] < 0.0) s1[i * PART_MAXVAR + PART_ZPOS] = 0.0;
-            }
-            if (g_bounce == 1) { //---------------------------------------------------------------------------
+            } else if (g_bounce === 1) { //---------------------------------------------------------------------------
                 if (s1[i * PART_MAXVAR + PART_XPOS] < 0.0 && s1[i * PART_MAXVAR + PART_XVEL] < 0.0 // collision!  left wall...
                 ) {		// bounce on left wall.
-                    s1[i * PART_MAXVAR + PART_XPOS] = 0.0;
-                    s1[i * PART_MAXVAR + PART_XVEL] = 0.0;
+                    s1[i * PART_MAXVAR + PART_XPOS] = 0.0;					// 1) resolve contact: put particle at wall.
+                    s1[i * PART_MAXVAR + PART_XVEL] = s0[i * PART_MAXVAR + PART_XVEL];			// we had a the START of the timestep.
+                    s1[i * PART_MAXVAR + PART_XVEL] *= g_drag;			// **BUT** velocity during our timestep is STILL
+                    if (s1[i * PART_MAXVAR + PART_XVEL] < 0.0) s1[i * PART_MAXVAR + PART_XVEL] = -g_resti * s1[i * PART_MAXVAR + PART_XVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_XVEL] = g_resti * s1[i * PART_MAXVAR + PART_XVEL];			// sign changed-- don't need another.
                 } else if (s1[i * PART_MAXVAR + PART_XPOS] > axisSize && s1[i * PART_MAXVAR + PART_XVEL] > 0.0		// collision! right wall...
                 ) {		// bounce on right wall
                     s1[i * PART_MAXVAR + PART_XPOS] = axisSize;					// 1) resolve contact: put particle at wall.
-                    s1[i * PART_MAXVAR + PART_XVEL] = 0.0;
+                    // 2) remove all x velocity gained from forces as
+                    // ball moved thru wall in this timestep. HOW?
+                    // Assume ball reached wall at START of
+                    // the timestep, thus: return to the orig.
+                    s1[i * PART_MAXVAR + PART_XVEL] = s0[i * PART_MAXVAR + PART_XVEL];			// velocity we had at the start of timestep;
+                    s1[i * PART_MAXVAR + PART_XVEL] *= g_drag;			// **BUT** reduced by drag (and any other forces
+                    if (s1[i * PART_MAXVAR + PART_XVEL] > 0.0) s1[i * PART_MAXVAR + PART_XVEL] = -g_resti * s1[i * PART_MAXVAR + PART_XVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_XVEL] = g_resti * s1[i * PART_MAXVAR + PART_XVEL];			// sign changed-- don't need another.
                 }
-                if (s1[i * PART_MAXVAR + PART_YPOS] < 0.0 && s1[i * PART_MAXVAR + PART_YVEL] < 0.0		// collision! floor
+                if (s1[i * PART_MAXVAR + PART_YPOS] < 0.0 && s1[i * PART_MAXVAR + PART_YVEL] < 0.0		// collision! left wall...
                 ) {		// bounce on floor
 
                     s1[i * PART_MAXVAR + PART_YPOS] = 0.0;					// 1) resolve contact: put particle at wall.
-                    s1[i * PART_MAXVAR + PART_YVEL] = 0;
+                    // 2) remove all y velocity gained from forces as
+                    // ball moved thru floor in this timestep. HOW?
+                    // Assume ball reached floor at START of
+                    // the timestep, thus: return to the orig.
+                    s1[i * PART_MAXVAR + PART_YVEL] = s0[i * PART_MAXVAR + PART_YVEL];			// velocity we had at the start of timestep;
+                    s1[i * PART_MAXVAR + PART_YVEL] *= g_drag;			// **BUT** reduced by drag (and any other forces
+                    if (s1[i * PART_MAXVAR + PART_YVEL] < 0.0) s1[i * PART_MAXVAR + PART_YVEL] = -g_resti * s1[i * PART_MAXVAR + PART_YVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_YVEL] = g_resti * s1[i * PART_MAXVAR + PART_YVEL];			// sign changed-- don't need another.
                 } else if (s1[i * PART_MAXVAR + PART_YPOS] > axisSize && s1[i * PART_MAXVAR + PART_YVEL] > 0.0 		// collision! front wall...
                 ) {		// bounce on ceiling
                     s1[i * PART_MAXVAR + PART_YPOS] = axisSize;					// 1) resolve contact: put particle at wall.
-                    s1[i * PART_MAXVAR + PART_YVEL] = 0;
+                    // 2) remove all y velocity gained from forces as
+                    // ball moved thru ceiling in this timestep. HOW?
+                    // Assume ball reached ceiling at START of
+                    // the timestep, thus: return to the orig.
+                    s1[i * PART_MAXVAR + PART_YVEL] = s0[i * PART_MAXVAR + PART_YVEL];			// velocity we had at the start of timestep;
+                    s1[i * PART_MAXVAR + PART_YVEL] *= g_drag;			// **BUT** reduced by drag (and any other forces
+                    if (s1[i * PART_MAXVAR + PART_YVEL] > 0.0) s1[i * PART_MAXVAR + PART_YVEL] = -g_resti * s1[i * PART_MAXVAR + PART_YVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_YVEL] = g_resti * s1[i * PART_MAXVAR + PART_YVEL];			// sign changed-- don't need another.
 
                 }
                 //	console.log('z = ' + s0[PART_ZPOS] + '  zVel = ' +s0[PART_ZVEL]);
@@ -227,12 +252,26 @@ PartSys.prototype.ForceField = function () {
                 ) {		// bounce on floor
 
                     s1[i * PART_MAXVAR + PART_ZPOS] = 0.0;					// 1) resolve contact: put particle at wall.
-                    s1[i * PART_MAXVAR + PART_ZVEL] = 0.0;
+                    // 2) remove all y velocity gained from forces as
+                    // ball moved thru floor in this timestep. HOW?
+                    // Assume ball reached floor at START of
+                    // the timestep, thus: return to the orig.
+                    s1[i * PART_MAXVAR + PART_ZVEL] = s0[i * PART_MAXVAR + PART_ZVEL];			// velocity we had at the start of timestep;
+                    s1[i * PART_MAXVAR + PART_ZVEL] *= g_drag;			// **BUT** reduced by drag (and any other forces
+                    if (s1[i * PART_MAXVAR + PART_ZVEL] < 0.0) s1[i * PART_MAXVAR + PART_ZVEL] = -g_resti * s1[i * PART_MAXVAR + PART_ZVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_ZVEL] = g_resti * s1[i * PART_MAXVAR + PART_ZVEL];			// sign changed-- don't need another.
                 } else if (s1[i * PART_MAXVAR + PART_ZPOS] > axisSize && s1[i * PART_MAXVAR + PART_ZVEL] > 0.0 		// collision! front wall...
                 ) {		// bounce on ceiling
 
                     s1[i * PART_MAXVAR + PART_ZPOS] = axisSize;					// 1) resolve contact: put particle at wall.
-                    s1[i * PART_MAXVAR + PART_ZVEL] = 0.0;
+                    // 2) remove all y velocity gained from forces as
+                    // ball moved thru ceiling in this timestep. HOW?
+                    // Assume ball reached ceiling at START of
+                    // the timestep, thus: return to the orig.
+                    s1[i * PART_MAXVAR + PART_ZVEL] = s0[i * PART_MAXVAR + PART_ZVEL];			// velocity we had at the start of timestep;
+                    s1[i * PART_MAXVAR + PART_ZVEL] *= g_drag;			// **BUT** reduced by drag (and any other forces
+                    if (s1[i * PART_MAXVAR + PART_ZVEL] > 0.0) s1[i * PART_MAXVAR + PART_ZVEL] = -g_resti * s1[i * PART_MAXVAR + PART_ZVEL]; // no sign change--bounce!
+                    else s1[i * PART_MAXVAR + PART_ZVEL] = g_resti * s1[i * PART_MAXVAR + PART_ZVEL];			// sign changed-- don't need another.
                 }
             } else {
                 console.log('?!?! unknown constraint: g_bounce==' + g_bounce);
@@ -329,7 +368,7 @@ PartSys.prototype.BouncyS0 = function () {
 
     this.c0 = [
         function (i, s1, s0) {
-            if (g_bounce == 0) { //--------------------------------------------------------
+            if (g_bounce === 0) { //--------------------------------------------------------
                 if (s1[i * PART_MAXVAR + PART_XPOS] < 0.0 && s1[i * PART_MAXVAR + PART_XVEL] < 0.0			// simple velocity-reversal
                 ) {		// bounce on left wall.
                     s1[i * PART_MAXVAR + PART_XVEL] = -g_resti * s1[i * PART_MAXVAR + PART_XVEL];
@@ -353,7 +392,7 @@ PartSys.prototype.BouncyS0 = function () {
                 }
                 //  -- hard limit on 'floor' keeps y position >= 0;
                 if (s1[i * PART_MAXVAR + PART_ZPOS] < 0.0) s1[i * PART_MAXVAR + PART_ZPOS] = 0.0;
-            } else if (g_bounce == 1) { //---------------------------------------------------------------------------
+            } else if (g_bounce === 1) { //---------------------------------------------------------------------------
                 if (s1[i * PART_MAXVAR + PART_XPOS] < 0.0 && s1[i * PART_MAXVAR + PART_XVEL] < 0.0 // collision!  left wall...
                 ) {		// bounce on left wall.
                     s1[i * PART_MAXVAR + PART_XPOS] = 0.0;					// 1) resolve contact: put particle at wall.

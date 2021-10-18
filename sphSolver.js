@@ -244,9 +244,9 @@ FluidVBObox.prototype.s0dotFinder = function (mygl, partSys) {
         partSys.s0dot[pOff + PART_XPOS] = partSys.s0[pOff + PART_XVEL];		// 0.0 <= randomRound() < 1.0
         partSys.s0dot[pOff + PART_YPOS] = partSys.s0[pOff + PART_YVEL];
         partSys.s0dot[pOff + PART_ZPOS] = partSys.s0[pOff + PART_ZVEL];
-        partSys.s0dot[pOff + PART_XVEL] = partSys.s0[pOff + PART_X_FTOT] * partSys.s0[pOff + PART_MASS];
-        partSys.s0dot[pOff + PART_YVEL] = partSys.s0[pOff + PART_Y_FTOT] * partSys.s0[pOff + PART_MASS];
-        partSys.s0dot[pOff + PART_ZVEL] = partSys.s0[pOff + PART_Z_FTOT] * partSys.s0[pOff + PART_MASS];
+        partSys.s0dot[pOff + PART_XVEL] = partSys.s0[pOff + PART_X_FTOT] / partSys.s0[pOff + PART_MASS];
+        partSys.s0dot[pOff + PART_YVEL] = partSys.s0[pOff + PART_Y_FTOT] / partSys.s0[pOff + PART_MASS];
+        partSys.s0dot[pOff + PART_ZVEL] = partSys.s0[pOff + PART_Z_FTOT] / partSys.s0[pOff + PART_MASS];
         partSys.s0dot[pOff + PART_X_FTOT] = 0.0;
         partSys.s0dot[pOff + PART_Y_FTOT] = 0.0;
         partSys.s0dot[pOff + PART_Z_FTOT] = 0.0;
@@ -487,9 +487,10 @@ FluidVBObox.prototype.PartSys_render = function (myGL, partSys) {
 FluidVBObox.prototype.reset = function (partSys) {
 
     for (var i = 0; i < partSys.partCount; i++) {
-        partSys.s0[pOff + PART_XVEL] += (-0.5 + Math.random()) * .02;
-        partSys.s0[pOff + PART_YVEL] += (-0.5 + Math.random()) * .02;
-        partSys.s0[pOff + PART_ZVEL] += (-0.5 + Math.random()) * .02;
+        let pOff = i * PART_MAXVAR
+        partSys.s0[pOff + PART_XVEL] += (-0.5 + Math.random());
+        partSys.s0[pOff + PART_YVEL] += (-0.5 + Math.random());
+        partSys.s0[pOff + PART_ZVEL] += (Math.random() * 2);
     }
 }
 FluidVBObox.prototype.resetWind = function (partSys) {
@@ -523,4 +524,16 @@ function createArray(length) {
     }
 
     return arr;
+}
+
+function calculateKernel(distance) {
+    let kernelCo = 1/(Math.pow(h, (1/Math.PI)))
+    let ratio = distance/h
+    if (distance < 1) {
+        return kernelCo * (Math.pow((2-ratio), 3)/4 - Math.pow((1-ratio), 3))
+    }
+    if (distance > 1 && distance < 2) {
+        return kernelCo * (Math.pow((2-ratio), 3)/4 - Math.pow((1-ratio), 3))
+    }
+    else return 0;
 }

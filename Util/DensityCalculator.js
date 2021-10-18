@@ -17,17 +17,15 @@ findDensity = function (s, partCount) {
                         Math.pow(zDist, 2))
                     realDistance = realDistance === 0 ? epsilon : realDistance;
                     if (realDistance < 2 * h) {
-                        let kernel = kernelCoefficient * Math.pow((2 - (realDistance / h)), 3);
+                        //let kernel = kernelCoefficient * Math.pow((2 - (realDistance / h)), 3);
+                        let kernel = calculateKernel(realDistance)
                         totDensity += kernel * s[pOff + PART_MASS];
-            //            console.log("distance:" + realDistance);
-              //          console.log(kernel * s[pOff + PART_MASS]);
                     }
                 }
             }
         }
         s[p + PART_DENSITY] = totDensity;
-        s[p + PART_PRESSURE] = Math.pow(speedOfSound, 2) * (totDensity - DENSITY_CONST);
-      //  console.log(totDensity);
+        s[p + PART_PRESSURE] = speedOfSound * (totDensity - DENSITY_CONST);
         if (maxDensity < totDensity) {
             maxDensity = totDensity;
         }
